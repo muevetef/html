@@ -6,7 +6,7 @@ $consulta = $pdo->prepare('SELECT * FROM products ORDER BY create_date DESC');
 $consulta->execute();
 
 $productos = $consulta->fetchAll(PDO::FETCH_ASSOC);
-var_dump($productos);
+//var_dump($productos);
 ?>
 
 <!doctype html>
@@ -41,13 +41,21 @@ var_dump($productos);
       <?php foreach ($productos as $i => $producto): ?>
         <tr>
           <th scope="row"><?php echo $i + 1 ?></th>
-          <td></td>
+          <td>
+            <?php if($producto['image']): ?>
+              <img src="<?= $producto['image'] ?>" alt="<?= $producto['title'] ?>" class="product-img">
+            <?php endif ?>
+          </td>
           <td><?php echo $producto['title'] ?></td>
           <td><?php echo $producto['price'] ?></td>
           <td><?php echo $producto['create_date'] ?></td>
           <td>
             <a href="" class="btn btn-sm btn-outline-primary">Editar</a>
-            <a href="" class="btn btn-sm btn-outline-danger">Borrar</a>
+            <!-- <a href="delete.php?id=<?php echo $producto['id']?>" class="btn btn-sm btn-outline-danger">Borrar</a> -->
+            <form action="delete.php" method="POST" style='display: inline-block'>
+              <input type="hidden" name="id" value='<?php echo $producto['id']?>'>
+              <button type="submit" class="btn btn-sm btn-outline-danger">Borrar</button>
+            </form>
           </td>
         </tr>
 
