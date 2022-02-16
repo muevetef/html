@@ -1,78 +1,34 @@
 <?php
+
+var_dump($_GET);
+
+$id = $_GET['id'] ?? null;
+if (!$id) {
+    header('Location:index.php');
+    exit;
+}
+
 $pdo = new PDO('mysql:host=localhost;port=3306;dbname=products_db', 'root', 'toor');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-echo '<pre>';
-var_dump($_FILES);
-echo '</pre>';
+$consulta = $pdo->prepare('SELECT * FROM products WHERE id = :id');
+$consulta->bindValue(':id', $id);
+$consulta->execute();
+
+$producto = $consulta->fetch(PDO::FETCH_ASSOC);
+
+var_dump($producto);
+
+$title = $producto['title'];
+$description = $producto['description'];
+$price = $producto['price'];
+$image = $producto['image'];
 
 
-$title = '';
-$description = '';
-$price = '';
 
-$errors = [];
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $title = $_POST['title'];
-    $description = $_POST['description'];
-    $price = $_POST['price'];
-    
-    $image = $_FILES['image'] ?? null;
-    $imagePath = '';
 
-    if(!is_dir('images')){
-        mkdir('images');
-    }
-    
-    if($image && $image['tmp_name']){
-        $imagePath = 'images/'.randomString(8).'/'.$image['name'];
-        // 'images/a3der5t/ipoeX.jpeg'
-        mkdir(dirname($imagePath));
-        move_uploaded_file($image['tmp_name'],$imagePath);
-    }
-
-    if (!$title) {
-        $errors[] = 'El titulo no puede estar vacio';
-    }
-
-    if (!$price) {
-        $errors[] = 'El precio no es correcto';
-    }
-
-    // var_dump($errors);
-
-    if (empty($errors)) {
-
-        $consulta = $pdo->prepare("INSERT INTO products 
-                        (title, image, description,price, create_date)
-                VALUES (:title, :image, :description, :price, :date)");
-        $consulta->bindValue(':title', $title);
-        $consulta->bindValue(':image', $imagePath);
-        $consulta->bindValue(':description', $description);
-        $consulta->bindValue(':price', $price);
-        $consulta->bindValue(':date', date('Y-m-d H:i:s'));
-
-        $consulta->execute();
-
-        //header('Location: index.php');
-    }
-}
-
-function randomString($n){
-
-    $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $str = '';
-
-    for($i = 0; $i < $n; $i++){
-        $index = rand(0, strlen($caracteres) -1);
-        $str .= $caracteres[$index];
-    }
-
-    return $str;
-}
 ?>
-
 <!doctype html>
 <html lang="es">
 
@@ -88,7 +44,7 @@ function randomString($n){
 </head>
 
 <body>
-    <h1>Crear un nuevo producto</h1>
+    <h1>Modificar producto: <?php echo $title ?></h1>
     <?php if (!empty($errors)) : ?>
         <div class="alert alert-danger">
             <?php foreach ($errors as $error) : ?>
@@ -97,6 +53,7 @@ function randomString($n){
         </div>
     <?php endif ?>
     <form method='post' enctype="multipart/form-data">
+        <img src="<?php echo $image ?>" alt="<?php echo $title ?>" class="product-img-view">
         <div class="mb-3">
             <label for="image" class="form-label">Imagen</label>
             <input type="file" class="form-control" id="image" name="image">

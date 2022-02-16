@@ -1,0 +1,15 @@
+{
+    "name": "daw/html",
+    "autoload": {
+        "psr-4": {
+            "Daw\\Html\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Antoni Moragues Font",
+            "email": "easyrobotics2@gmail.com"
+        }
+    ],
+    "require": {}
+}

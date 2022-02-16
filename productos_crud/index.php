@@ -1,4 +1,6 @@
 <?php
+
+
 $pdo = new PDO('mysql:host=localhost;port=3306;dbname=products_db', 'root', 'toor');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -50,7 +52,7 @@ $productos = $consulta->fetchAll(PDO::FETCH_ASSOC);
           <td><?php echo $producto['price'] ?></td>
           <td><?php echo $producto['create_date'] ?></td>
           <td>
-            <a href="" class="btn btn-sm btn-outline-primary">Editar</a>
+            <a href="update.php?id=<?php echo $producto['id']?>" class="btn btn-sm btn-outline-primary">Editar</a>
             <!-- <a href="delete.php?id=<?php echo $producto['id']?>" class="btn btn-sm btn-outline-danger">Borrar</a> -->
             <form action="delete.php" method="POST" style='display: inline-block'>
               <input type="hidden" name="id" value='<?php echo $producto['id']?>'>
