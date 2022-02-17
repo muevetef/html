@@ -2,10 +2,6 @@
 $pdo = new PDO('mysql:host=localhost;port=3306;dbname=products_db', 'root', 'toor');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-echo '<pre>';
-var_dump($_FILES);
-echo '</pre>';
-
 
 $title = '';
 $description = '';
@@ -17,19 +13,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'];
     $description = $_POST['description'];
     $price = $_POST['price'];
-    
+
     $image = $_FILES['image'] ?? null;
     $imagePath = '';
 
-    if(!is_dir('images')){
+    if (!is_dir('images')) {
         mkdir('images');
     }
-    
-    if($image && $image['tmp_name']){
-        $imagePath = 'images/'.randomString(8).'/'.$image['name'];
+
+    if ($image && $image['tmp_name']) {
+        $imagePath = 'images/' . randomString(8) . '/' . $image['name'];
         // 'images/a3der5t/ipoeX.jpeg'
         mkdir(dirname($imagePath));
-        move_uploaded_file($image['tmp_name'],$imagePath);
+        move_uploaded_file($image['tmp_name'], $imagePath);
     }
 
     if (!$title) {
@@ -55,17 +51,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $consulta->execute();
 
-        //header('Location: index.php');
+        header('Location: index.php');
     }
 }
 
-function randomString($n){
+function randomString($n)
+{
 
     $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $str = '';
 
-    for($i = 0; $i < $n; $i++){
-        $index = rand(0, strlen($caracteres) -1);
+    for ($i = 0; $i < $n; $i++) {
+        $index = rand(0, strlen($caracteres) - 1);
         $str .= $caracteres[$index];
     }
 
@@ -83,12 +80,15 @@ function randomString($n){
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <title>Hello, world!</title>
 </head>
 
 <body>
     <h1>Crear un nuevo producto</h1>
+    <p>
+        <a href="index.php" class="btn btn-secondary">Volver a productos</a>
+    </p>
     <?php if (!empty($errors)) : ?>
         <div class="alert alert-danger">
             <?php foreach ($errors as $error) : ?>

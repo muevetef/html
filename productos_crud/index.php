@@ -3,12 +3,21 @@
 
 $pdo = new PDO('mysql:host=localhost;port=3306;dbname=products_db', 'root', 'toor');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// echo '<pre>';
+// var_dump($_GET);
+// echo '</pre>';
+$search = $_GET['search'] ?? null;
 
-$consulta = $pdo->prepare('SELECT * FROM products ORDER BY create_date DESC');
+if ($search) {
+  $consulta = $pdo->prepare('SELECT * FROM products WHERE title LIKE :search ORDER BY create_date DESC');
+  $consulta->bindValue(":search", "%$search%");
+} else {
+  $consulta = $pdo->prepare('SELECT * FROM products ORDER BY create_date DESC');
+}
 $consulta->execute();
 
 $productos = $consulta->fetchAll(PDO::FETCH_ASSOC);
-//var_dump($productos);
+
 ?>
 
 <!doctype html>
@@ -26,6 +35,17 @@ $productos = $consulta->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body>
+
+
+  <form action="" method="GET" class="col-5">
+    <div class="input-group mb-3">
+      <input class="form-control" type="search" placeholder="Search" name="search">
+      <div class="input-group-append">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </div>
+    </div>
+  </form>
+
   <h1>Productos CRUD</h1>
   <a href="create.php" type="button" class='btn btn-sm btn-success'>Nuevo</a>
   <table class="table">
@@ -40,11 +60,11 @@ $productos = $consulta->fetchAll(PDO::FETCH_ASSOC);
       </tr>
     </thead>
     <tbody>
-      <?php foreach ($productos as $i => $producto): ?>
+      <?php foreach ($productos as $i => $producto) : ?>
         <tr>
           <th scope="row"><?php echo $i + 1 ?></th>
           <td>
-            <?php if($producto['image']): ?>
+            <?php if ($producto['image']) : ?>
               <img src="<?= $producto['image'] ?>" alt="<?= $producto['title'] ?>" class="product-img">
             <?php endif ?>
           </td>
@@ -52,10 +72,11 @@ $productos = $consulta->fetchAll(PDO::FETCH_ASSOC);
           <td><?php echo $producto['price'] ?></td>
           <td><?php echo $producto['create_date'] ?></td>
           <td>
-            <a href="update.php?id=<?php echo $producto['id']?>" class="btn btn-sm btn-outline-primary">Editar</a>
-            <!-- <a href="delete.php?id=<?php echo $producto['id']?>" class="btn btn-sm btn-outline-danger">Borrar</a> -->
+            <a href="update.php?id=<?php echo $producto['id'] ?>" class="btn btn-sm btn-outline-primary">Editar</a>
+            <!-- <a href="delete.php?id=<?php echo $producto['id'] ?>" class="btn btn-sm btn-outline-danger">Borrar</a> -->
             <form action="delete.php" method="POST" style='display: inline-block'>
-              <input type="hidden" name="id" value='<?php echo $producto['id']?>'>
+              <input type="hidden" name="id" value='<?php echo $producto['id'] ?>'>
+              <input type="hidden" name="imagePath" value='<?php echo $producto['image'] ?>'>
               <button type="submit" class="btn btn-sm btn-outline-danger">Borrar</button>
             </form>
           </td>
@@ -64,7 +85,9 @@ $productos = $consulta->fetchAll(PDO::FETCH_ASSOC);
       <?php endforeach ?>
     </tbody>
   </table>
-
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 
 </html>

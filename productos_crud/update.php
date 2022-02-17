@@ -17,15 +17,77 @@ $consulta->execute();
 
 $producto = $consulta->fetch(PDO::FETCH_ASSOC);
 
-var_dump($producto);
+
 
 $title = $producto['title'];
 $description = $producto['description'];
 $price = $producto['price'];
-$image = $producto['image'];
+$imagePath = $producto['image'];
 
 
+if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    $title = $_POST['title'];
+    $description = $_POST['description'];
+    $price = $_POST['price'];
 
+    $image = $_FILES['image']; 
+    //TODO tratar la imagen
+
+    if (!is_dir('images')) {
+        mkdir('images');
+    }
+
+    if ($image && $image['tmp_name']){
+        if($imagePath){
+            unlink(($imagePath));
+            rmdir(dirname($imagePath));
+        }
+        $imagePath = 'images/' . randomString(8) . '/' . $image['name'];
+        mkdir(dirname($imagePath));
+        move_uploaded_file($image['tmp_name'], $imagePath);
+    }
+
+    if (!$title) {
+        $errors[] = 'El titulo no puede estar vacio';
+    }
+
+    if (!$price) {
+        $errors[] = 'El precio no es correcto';
+    }
+
+    if (empty($errors)) {
+
+        $consulta = $pdo->prepare("UPDATE products SET
+                                title = :title,
+                                image = :image,
+                                description = :description,
+                                price = :price WHERE id = :id");
+        $consulta->bindValue(':title', $title);
+        $consulta->bindValue(':image', $imagePath);
+        $consulta->bindValue(':description', $description);
+        $consulta->bindValue(':price', $price);
+        $consulta->bindValue(':id', $id);
+
+        $consulta->execute();
+
+        header('Location: index.php');
+    }
+
+}
+
+function randomString($n)
+{
+
+    $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $str = '';
+
+    for ($i = 0; $i < $n; $i++) {
+        $index = rand(0, strlen($caracteres) - 1);
+        $str .= $caracteres[$index];
+    }
+
+    return $str;
+}
 
 
 ?>
@@ -45,6 +107,9 @@ $image = $producto['image'];
 
 <body>
     <h1>Modificar producto: <?php echo $title ?></h1>
+    <p>
+        <a href="index.php" class="btn btn-secondary">Volver a productos</a>
+    </p>
     <?php if (!empty($errors)) : ?>
         <div class="alert alert-danger">
             <?php foreach ($errors as $error) : ?>
@@ -53,7 +118,9 @@ $image = $producto['image'];
         </div>
     <?php endif ?>
     <form method='post' enctype="multipart/form-data">
-        <img src="<?php echo $image ?>" alt="<?php echo $title ?>" class="product-img-view">
+        <?php if ($imagePath) : ?>
+            <img src="<?php echo $imagePath ?>" alt="<?php echo $title ?>" class="product-img-view">
+        <?php endif ?>
         <div class="mb-3">
             <label for="image" class="form-label">Imagen</label>
             <input type="file" class="form-control" id="image" name="image">
